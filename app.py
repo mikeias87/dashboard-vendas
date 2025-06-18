@@ -335,3 +335,7 @@ def atualizar_aba(aba, cidades, clientes, industrias, anos, meses, tipo_centro):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+# Expor o objeto app como server para o Gunicorn
+app = app.server
