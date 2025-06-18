@@ -1,6 +1,7 @@
 dash
 pandas
-plotly
 openpyxl
+plotly
+flask
+flask_httpauth
 gunicorn
-flask-httpauth
