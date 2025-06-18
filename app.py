@@ -53,7 +53,21 @@ app.title = "Dashboard com Abas e Donuts por Indústria"
 
 
 app.layout = html.Div([
-    html.Div([
+    html.Button("☰ Filtros", id="toggle-filtros", n_clicks=0, style={
+        "position": "fixed",
+        "top": "10px",
+        "left": "10px",
+        "zIndex": "999",
+        "backgroundColor": "#2980b9",
+        "color": "white",
+        "border": "none",
+        "padding": "10px 15px",
+        "borderRadius": "5px",
+        "fontSize": "16px",
+        "display": "block"
+    }),
+
+    html.Div(id="painel-filtros", children=[html.Div([
         html.Img(src="data:image/jpeg;base64," + encoded_logo,
                  style={"width": "100%", "margin-bottom": "20px"}),
         html.H2("Painel de Filtros", style={"color": "white", "text-align": "center", "margin-bottom": "20px"}),
@@ -82,7 +96,7 @@ app.layout = html.Div([
             style={"color": "white"}
         )
     ], style={
-        "flex": "1", "minWidth": "250px",
+        "flex": "1", "minWidth": "180px", "maxWidth": "220px", "width": "100%",
 "minWidth": "160px",
 "padding": "20px",
 "background-color": "#1f2c56",
@@ -97,7 +111,7 @@ app.layout = html.Div([
         "top": "0px",
         "overflowY": "auto",
         "fontFamily": "Segoe UI, Roboto, sans-serif"
-    }),
+    })], style={"display": "block"}),
 
     html.Div([
         html.Div(id="cards", style={
@@ -147,195 +161,35 @@ app.layout = html.Div([
 ], style={"display": "flex", "flexWrap": "wrap", "flexDirection": "row", "margin": "0", "padding": "0", "fontFamily": "Segoe UI, Roboto, sans-serif"})
 
 
-@app.callback(
-    Output("filtro-cidade", "options"),
-    Output("filtro-cliente", "options"),
-    Output("filtro-industria", "options"),
-    Output("filtro-ano", "options"),
-    Output("filtro-mes", "options"),
-    Input("btn-reset", "n_clicks")
-)
-def atualizar_opcoes(n):
-    return (
-        [{"label": c, "value": c} for c in sorted(df["Cidade"].unique())],
-        [{"label": c, "value": c} for c in sorted(df["Cliente"].unique())],
-        [{"label": c, "value": c} for c in sorted(df["Indústria"].unique())],
-        [{"label": str(a), "value": a} for a in sorted(df["Ano"].unique())],
-        [{"label": m, "value": m} for m in df["Mês"].unique()]
-    )
+
 
 @app.callback(
-    Output("filtro-cidade", "value"),
-    Output("filtro-cliente", "value"),
-    Output("filtro-industria", "value"),
-    Output("filtro-ano", "value"),
-    Output("filtro-mes", "value"),
-    Input("btn-reset", "n_clicks")
-)
-def limpar_filtros(n):
-    return None, None, None, None, None
-
-@app.callback(
-    Output("cards", "children"),
-    Input("filtro-cidade", "value"),
-    Input("filtro-cliente", "value"),
-    Input("filtro-industria", "value"),
-    Input("filtro-ano", "value"),
-    Input("filtro-mes", "value")
-)
-def atualizar_cards(cidades, clientes, industrias, anos, meses):
-    dff = df.copy()
-    if cidades: dff = dff[dff["Cidade"].isin(cidades)]
-    if clientes: dff = dff[dff["Cliente"].isin(clientes)]
-    if industrias: dff = dff[dff["Indústria"].isin(industrias)]
-    if anos: dff = dff[dff["Ano"].isin(anos)]
-    if meses: dff = dff[dff["Mês"].isin(meses)]
-
-    total = dff["Valor da Venda (R$)"].sum()
-    pedidos = len(dff)
-    clientes_ativos = dff["Cliente"].nunique()
-    industrias_ativas = dff["Indústria"].nunique()
-
-    return [
-        html.Div([html.H4("💰 Vendas"), html.H3(f"R$ {total:,.2f}")], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "flex": "1", "minWidth": "140px", "maxWidth": "220px", "textAlign": "center"}),
-        html.Div([html.H4("📦 Pedidos"), html.H3(pedidos)], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "flex": "1", "minWidth": "140px", "maxWidth": "220px", "textAlign": "center"}),
-        html.Div([html.H4("👥 Clientes"), html.H3(clientes_ativos)], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "flex": "1", "minWidth": "140px", "maxWidth": "220px", "textAlign": "center"}),
-        html.Div([html.H4("🏭 Indústrias"), html.H3(industrias_ativas)], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "flex": "1", "minWidth": "140px", "maxWidth": "220px", "textAlign": "center"})
-    ]
-
-@app.callback(
-    Output("conteudo-abas", "children"),
-    Input("aba-principal", "value"),
+    Output("painel-filtros", "style"),
+    Input("toggle-filtros", "n_clicks"),
     Input("filtro-cidade", "value"),
     Input("filtro-cliente", "value"),
     Input("filtro-industria", "value"),
     Input("filtro-ano", "value"),
     Input("filtro-mes", "value"),
-    Input("tipo-centro-donut", "value")
+    Input("aba-principal", "value"),
+    State("painel-filtros", "style"),
+    prevent_initial_call=True
 )
-def atualizar_aba(aba, cidades, clientes, industrias, anos, meses, tipo_centro):
-    dff = df.copy()
-    if cidades: dff = dff[dff["Cidade"].isin(cidades)]
-    if clientes: dff = dff[dff["Cliente"].isin(clientes)]
-    if industrias: dff = dff[dff["Indústria"].isin(industrias)]
-    if anos: dff = dff[dff["Ano"].isin(anos)]
-    if meses: dff = dff[dff["Mês"].isin(meses)]
+def toggle_filtros(n_clicks, cidade, cliente, industria, ano, mes, aba, current_style):
+    ctx = dash.callback_context
+    if not ctx.triggered or not current_style:
+        return current_style
 
-    if aba == "visao":
-        resumo = dff.groupby("Indústria")["Valor da Venda (R$)"].sum().reset_index()
-        resumo = resumo.merge(df_metas, on="Indústria", how="left")
-        resumo["% Meta"] = (resumo["Valor da Venda (R$)"] / resumo["Meta Valor Anual"]).fillna(0)
+    trigger = ctx.triggered[0]["prop_id"].split(".")[0]
 
-        
-        donuts = []
-        for _, row in resumo.iterrows():
-            valor = row["Valor da Venda (R$)"]
-            meta = row["Meta Valor Anual"]
-            restante = max(meta - valor, 0)
-            porcentagem = row["% Meta"]
-            cor_donut = "#2ecc71" if porcentagem >= 1 else "#e74c3c"
-            texto = f"{int(min(porcentagem, 1)*100)}%" if tipo_centro == "percent" else f"R${valor/1e3:.0f} mil"
-
-            fig = go.Figure(data=[
-                go.Pie(
-                    values=[valor, restante],
-                    labels=["Realizado", "Restante"],
-                    hole=0.7,
-                    marker_colors=[cor_donut, "#e0e0e0"],
-                    textinfo="none"
-                )
-            ])
-            fig.update_layout(
-                annotations=[
-                    dict(text=texto, x=0.5, y=0.5, font_size=18, showarrow=False),
-                    dict(text=row["Indústria"], x=0.5, y=0.15, font_size=12, showarrow=False)
-                ],
-                margin=dict(l=20, r=20, t=20, b=20),
-                showlegend=False,
-                height=200,
-                width=200
-            )
-            donuts.append(dcc.Graph(figure=fig, style={"width": "100%", "maxWidth": "240px", "margin": "10px"}))
-
-        return html.Div([
-            html.Div(donuts, style={"display": "flex", "flex-wrap": "wrap", "justify-content": "center"})
-        ])
-
-
-    elif aba == "cliente":
-        ranking = dff.groupby("Cliente")["Valor da Venda (R$)"].sum().reset_index()
-        ranking = ranking.sort_values(by="Valor da Venda (R$)", ascending=False).reset_index(drop=True)
-        ranking["Posição"] = ranking.index + 1
-
-        tabela = dash_table.DataTable(
-            columns=[
-                {"name": "Posição", "id": "Posição"},
-                {"name": "Cliente", "id": "Cliente"},
-                {"name": "Valor da Venda (R$)", "id": "Valor da Venda (R$)", "type": "numeric", "format": {"specifier": ".2f"}}
-            ],
-            data=ranking.to_dict("records"),
-            style_cell={"textAlign": "left", "padding": "5px", "fontFamily": "Segoe UI"},
-            style_header={"backgroundColor": "#2980b9", "color": "white", "fontWeight": "bold"},
-            style_data={"backgroundColor": "#ffffff"},
-            style_table={"overflowX": "auto"},
-            page_size=15
-        )
-        return html.Div([html.H4("Ranking de Clientes"), tabela])
-
-
-    elif aba == "produto":
-        if "Produto" in dff.columns:
-            fig = px.pie(dff.groupby("Produto")["Valor da Venda (R$)"].sum().nlargest(10).reset_index(),
-                         names="Produto", values="Valor da Venda (R$)", title="Participação por Produto")
+    if trigger == "toggle-filtros":
+        # Toggle manual
+        if current_style.get("display") == "none":
+            current_style["display"] = "block"
         else:
-            fig = go.Figure()
-        return dcc.Graph(figure=fig)
+            current_style["display"] = "none"
+    else:
+        # Fechar ao interagir com filtros ou aba
+        current_style["display"] = "none"
 
-    elif aba == "cidade":
-        ranking = dff.groupby("Cidade")["Valor da Venda (R$)"].sum().reset_index()
-        ranking = ranking.sort_values(by="Valor da Venda (R$)", ascending=False).reset_index(drop=True)
-        ranking["Posição"] = ranking.index + 1
-
-        tabela = dash_table.DataTable(
-            columns=[
-                {"name": "Posição", "id": "Posição"},
-                {"name": "Cidade", "id": "Cidade"},
-                {"name": "Valor da Venda (R$)", "id": "Valor da Venda (R$)", "type": "numeric", "format": {"specifier": ".2f"}}
-            ],
-            data=ranking.to_dict("records"),
-            style_cell={"textAlign": "left", "padding": "5px", "fontFamily": "Segoe UI"},
-            style_header={"backgroundColor": "#2980b9", "color": "white", "fontWeight": "bold"},
-            style_data={"backgroundColor": "#ffffff"},
-            style_table={"overflowX": "auto"},
-            page_size=15
-        )
-        return html.Div([html.H4("Ranking de Cidades"), tabela])
-
-    elif aba == "cliente":
-        ranking = dff.groupby("Cliente")["Valor da Venda (R$)"].sum().reset_index()
-        ranking = ranking.sort_values(by="Valor da Venda (R$)", ascending=False).reset_index(drop=True)
-        ranking["Posição"] = ranking.index + 1
-
-        tabela = dash_table.DataTable(
-            columns=[
-                {"name": "Posição", "id": "Posição"},
-                {"name": "Cliente", "id": "Cliente"},
-                {"name": "Valor da Venda (R$)", "id": "Valor da Venda (R$)", "type": "numeric", "format": {"specifier": ".2f"}}
-            ],
-            data=ranking.to_dict("records"),
-            style_cell={"textAlign": "left", "padding": "5px", "fontFamily": "Segoe UI"},
-            style_header={"backgroundColor": "#2980b9", "color": "white", "fontWeight": "bold"},
-            style_data={"backgroundColor": "#ffffff"},
-            style_table={"overflowX": "auto"},
-            page_size=15
-        )
-        return html.Div([html.H4("Ranking de Clientes"), tabela])
-
-    return html.Div("Nenhum gráfico disponível.")
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
-
-# Expor o objeto app como server para o Gunicorn
-app = app.server
+    return current_style
