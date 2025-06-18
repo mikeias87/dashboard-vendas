@@ -48,7 +48,7 @@ def before_request():
     pass
 
 
-app = dash.Dash(__name__, server=server, meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
+app = dash.Dash(__name__, server=server)
 app.title = "Dashboard com Abas e Donuts por Indústria"
 
 
@@ -82,7 +82,7 @@ app.layout = html.Div([
             style={"color": "white"}
         )
     ], style={
-        "flex": "1", "minWidth": "250px",
+        "width": "10%",
 "minWidth": "160px",
 "padding": "20px",
 "background-color": "#1f2c56",
@@ -132,7 +132,7 @@ app.layout = html.Div([
         html.Div(id="conteudo-abas"),
         html.Div(id="detalhamento", style={"margin-top": "30px"})
     ], style={
-        "flex": "3",
+        "width": "90%",
 "minWidth": "0",
 "padding": "20px",
 "overflowY": "scroll",
@@ -144,7 +144,7 @@ app.layout = html.Div([
         "backgroundColor": "#f4f6f8",
         "fontFamily": "Segoe UI, Roboto, sans-serif"
     })
-], style={"display": "flex", "flexWrap": "wrap", "flexDirection": "row", "margin": "0", "padding": "0", "fontFamily": "Segoe UI, Roboto, sans-serif"})
+], style={"display": "flex", "margin": "0", "padding": "0", "fontFamily": "Segoe UI, Roboto, sans-serif"})
 
 
 @app.callback(
@@ -197,10 +197,10 @@ def atualizar_cards(cidades, clientes, industrias, anos, meses):
     industrias_ativas = dff["Indústria"].nunique()
 
     return [
-        html.Div([html.H4("💰 Vendas"), html.H3(f"R$ {total:,.2f}")], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "flex": "1", "minWidth": "140px", "maxWidth": "220px", "textAlign": "center"}),
-        html.Div([html.H4("📦 Pedidos"), html.H3(pedidos)], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "flex": "1", "minWidth": "140px", "maxWidth": "220px", "textAlign": "center"}),
-        html.Div([html.H4("👥 Clientes"), html.H3(clientes_ativos)], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "flex": "1", "minWidth": "140px", "maxWidth": "220px", "textAlign": "center"}),
-        html.Div([html.H4("🏭 Indústrias"), html.H3(industrias_ativas)], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "flex": "1", "minWidth": "140px", "maxWidth": "220px", "textAlign": "center"})
+        html.Div([html.H4("💰 Vendas"), html.H3(f"R$ {total:,.2f}")], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "width": "22%", "textAlign": "center"}),
+        html.Div([html.H4("📦 Pedidos"), html.H3(pedidos)], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "width": "22%", "textAlign": "center"}),
+        html.Div([html.H4("👥 Clientes"), html.H3(clientes_ativos)], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "width": "22%", "textAlign": "center"}),
+        html.Div([html.H4("🏭 Indústrias"), html.H3(industrias_ativas)], style={"padding": "15px", "backgroundColor": "#ffffff", "borderRadius": "10px", "boxShadow": "0 2px 6px rgba(0,0,0,0.1)", "width": "22%", "textAlign": "center"})
     ]
 
 @app.callback(
@@ -255,7 +255,7 @@ def atualizar_aba(aba, cidades, clientes, industrias, anos, meses, tipo_centro):
                 height=200,
                 width=200
             )
-            donuts.append(dcc.Graph(figure=fig, style={"width": "100%", "maxWidth": "240px", "margin": "10px"}))
+            donuts.append(dcc.Graph(figure=fig, style={"display": "inline-block", "margin": "10px"}))
 
         return html.Div([
             html.Div(donuts, style={"display": "flex", "flex-wrap": "wrap", "justify-content": "center"})
