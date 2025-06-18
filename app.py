@@ -25,9 +25,31 @@ with open(logo_path, "rb") as f:
     encoded_logo = base64.b64encode(f.read()).decode()
 
 # --- App Layout ---
-app = dash.Dash(__name__)
+
+from flask import Flask
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
+
+server = Flask(__name__)
+auth = HTTPBasicAuth()
+
+users = {
+    "mikeiasrepresentacoes": generate_password_hash("37951672")
+}
+
+@auth.verify_password
+def verify_password(username, password):
+    if username in users and check_password_hash(users.get(username), password):
+        return username
+
+@server.before_request
+@auth.login_required
+def before_request():
+    pass
+
+
+app = dash.Dash(__name__, server=server)
 app.title = "Dashboard com Abas e Donuts por Indústria"
-server = app.server
 
 
 app.layout = html.Div([
